@@ -1,4 +1,6 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
+require_once APPPATH.'libraries/jwt/JWT.php';
+use \Firebase\JWT\JWT;
 
 class Parents_Controllers extends CI_Controller
 {
@@ -6,6 +8,7 @@ class Parents_Controllers extends CI_Controller
 	public function __construct() 
 	{
             parent::__construct();
+            $this->load->model('Login_model', '', TRUE);
 
 
             /* autoload module items */
@@ -43,6 +46,8 @@ class Parents_Controllers extends CI_Controller
         private function reject_404(){ $this->error = 'ID not found'; $this->status = 404; }
         function reject_token($mess='Invalid Token or Expired..!',$status=401){
             if ($this->status404 == FALSE){ $this->reject_404(); }else{ $this->error = $mess; $this->status = $status; }
+            $data['error'] = $this->error; 
+            $this->output_response($data, $this->status);
         }
         
       function output_response($data, $status = 200){ 
@@ -54,6 +59,20 @@ class Parents_Controllers extends CI_Controller
           ->set_output(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ))
           ->_display();
           exit;  
+      }
+      
+    function otentikasi(){
+        if ($this->input->server('REQUEST_METHOD') != 'OPTIONS'){
+            $jwt = $this->input->get_request_header('X-auth-token');
+            if ($this->Login_model->cek_token($jwt) == TRUE)
+            {
+                $decoded = JWT::decode($jwt, 'inl', array('HS256'));
+                if ($this->Login_model->cek_token_user($decoded->userid,$jwt) == TRUE){
+                  try{ return TRUE;}
+                  catch (\Exception $e){ return FALSE; }
+                }else{ return FALSE; }
+            }else{ return FALSE; }
+        }else{ return TRUE; }
     }
         
         

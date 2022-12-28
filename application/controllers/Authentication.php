@@ -4,35 +4,42 @@ require_once(APPPATH.'core/Parents_Controllers.php');
 require_once APPPATH.'libraries/jwt/JWT.php';
 use \Firebase\JWT\JWT;
 
-class Welcome extends Parents_Controllers {
+class Authentication extends Parents_Controllers {
     
     function __construct()
     {
         parent::__construct();
         
-        $this->load->model('Main_model', '', TRUE);
+//        $this->load->model('Main_model', '', TRUE);
         $this->load->model('Login_model', '', TRUE);
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
         header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');  
     }
-
+    
     function index()
     {
-        $this->resx = $this->Main_model->get_last(30,0,0)->result();
-        $this->count = $this->Main_model->get_last(30,0,1);
-        $data['record'] = $this->count; 
-        $data['result'] = $this->resx; 
-//        $this->load->view('index.html');
-        $this->output_response($data);
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+            
+            if (isset($datax['limit']) && isset($datax['offset'])){
+                $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];
+            }
+            
+            $this->resx = $this->Login_model->get_last($this->limitx, $this->offsetx,0)->result();
+            $this->count = $this->Login_model->get_last($this->limitx, $this->offsetx,1);
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data);
+            
+        }else{ $this->reject_token(); }
     }
     
     function login()
     {
         $datax = (array)json_decode(file_get_contents('php://input')); 
 
-        $status = 200;
-        $error = "null";
         $logid = null;
         $token = null;
         
@@ -61,24 +68,22 @@ class Welcome extends Parents_Controllers {
 //                $payload['role'] = $role;
 //                $payload['rules'] = $rules;
 //                $payload['log'] = $logid;
-                $payload['time'] = $waktu;
+                $payload['datetime'] = $waktu;
 //                $payload['branch'] = $branch;
                 $token = JWT::encode($payload, 'inl');
                 $this->Login_model->set_token($userid,$token);  
 //                $this->log->insert($userid, $this->date, $this->time, 'login');
 //                $this->login->add($userid, $logid, $token);
             }
-            else{ $status = 401; $error = 'Invalid Login'; }
-       }else{ $status = 401; $error = 'Invalid Format'; }   
+            else{ $this->status = 401; $this->error = 'Invalid Login'; }
+       }else{ $this->status = 401; $this->error = 'Invalid Format'; }   
        
-       $output = array('token' => $token,'error' => $error); 
+       $output = array('token' => $token,'error' => $this->error); 
 //       print_r($output);
-       $this->output_response($output,$status);
+       $this->output_response($output, $this->status);
     }
     
-    function otentikasi(){
-        $status = 200;
-        $error = TRUE;
+    function decode(){
         if ($this->input->server('REQUEST_METHOD') != 'OPTIONS'){
             $jwt = $this->input->get_request_header('X-auth-token');
             if ($this->Login_model->cek_token($jwt) == TRUE)
@@ -89,18 +94,16 @@ class Welcome extends Parents_Controllers {
                     $error = $decoded;
                   }
                   catch (\Exception $e){ 
-                      $status = 400; $error = 'Error Encoding Token';
+                      $this->status = 400; $this->error = 'Error Encoding Token';
                   }
-                }else{ $error = 'Authentication Failed'; $status = 401; }
-            }else{ $status = 401; $error = 'Token Not Found'; }
+                }else{ $this->error = 'Authentication Failed'; $this->status = 401; }
+            }else{ $this->status = 401; $this->error = 'Token Not Found'; }
 
         }
-        $this->output_response($error,$status);
+        $this->output_response($this->error, $this->status);
     }
     
-    function logout(){
-       $status = 200;
-       $error = TRUE; 
+    function logout(){ 
         if ($this->input->server('REQUEST_METHOD') != 'OPTIONS'){
             $jwt = $this->input->get_request_header('X-auth-token');
             if ($this->Login_model->cek_token($jwt) == TRUE)
@@ -108,12 +111,13 @@ class Welcome extends Parents_Controllers {
                 $decoded = JWT::decode($jwt, 'inl', array('HS256'));
                 if ($this->Login_model->cek_token_user($decoded->userid,$jwt) == TRUE){
                     $stts = $this->Login_model->set_token($decoded->userid,null);
-                    if ($stts == TRUE){ $error = 'Logout Success'; }
-                }else{ $error = 'Authentication Failed'; $status = 401; }
-            }else{ $status = 401; $error = 'Token Not Found'; }
+                    if ($stts == TRUE){ $this->error = 'Logout Success'; }
+                }else{ $this->error = 'Authentication Failed'; $this->status = 401; }
+            }else{ $this->status = 401; $this->error = 'Token Not Found'; }
 
         }
-        $this->output_response($error,$status);
+        $data['error'] = $this->error;
+        $this->output_response($data, $this->status);
     }
     
 }

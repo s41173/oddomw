@@ -6,18 +6,22 @@ class Main_model extends Custom_Model {
         function __construct()
         {
             parent::__construct();
-            $this->tableName = 'res_users';
+            $this->tableName = 'stock_picking';
             $this->field = $this->db->list_fields($this->tableName);
         }
 
         protected $field;
         
-        public function get_last($limit=50, $offset=0, $count=0)
+        public function get_last($search=null,$limit=50, $offset=0, $count=0)
         {
            $this->db->select($this->field);
            $this->db->from($this->tableName); 
+           if ($search){ $this->db->like('origin', $search, 'both');  }
+//           $this->db->where('name', $search);
+//           $this->db->like('name', $search, 'both'); 
            $this->cek_count($count,$limit,$offset);
            if ($count==0){ return $this->db->get(); }else{ return $this->db->get()->num_rows(); }
         }
+        
 
 }
