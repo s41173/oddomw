@@ -188,7 +188,10 @@ class Custom_Model extends CI_Model {
         return $this->db->count_all($this->tableName);
     }
     
-    function cek_count($val=0,$limit=0,$offset=0){if ($val == 0){ $this->db->limit($limit, $offset); }}
+    function cek_count($val=0,$limit=0,$offset=0){
+        if ($val === 0){ $this->db->limit($limit, $offset); }    
+//        return $val;
+    }
     
     function counter($field='id')
     {

@@ -106,11 +106,11 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 //	'dsn'=> '',
-    'dsn'      => 'pgsql:host=36.92.181.10;port=6295;dbname=live_inl_tester',
+    'dsn'      => 'pgsql:host=36.92.181.10;port=6295;dbname=live_inl_tester2',
 	'hostname' => '103.236.201.38',
 	'username' => 'odoo',
 	'password' => '^^myodoo2022^^',
-	'database' => 'live_inl_tester',
+	'database' => 'live_inl_tester2',
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',
 	'pconnect' => TRUE,
