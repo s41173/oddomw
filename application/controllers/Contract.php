@@ -17,6 +17,7 @@ class Contract extends Parents_Controllers {
         $this->load->library('Product_uom_lib');
         $this->load->library('Stock_location_lib');
         $this->load->library('Res_user_lib');
+        $this->load->library('Stock_picking_truck_lib');
         
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -118,7 +119,6 @@ class Contract extends Parents_Controllers {
         $this->form_validation->set_rules('tarra_from', 'Tarra From', 'numeric|required');
         $this->form_validation->set_rules('netto_from', 'Netto From', 'numeric|required');
         
-        
         $this->form_validation->set_rules('bruto', 'Bruto', 'numeric|required');
         $this->form_validation->set_rules('tarra', 'Tarra', 'numeric|required');
         $this->form_validation->set_rules('qty_done', 'Qty Done', 'numeric|required');
@@ -142,7 +142,6 @@ class Contract extends Parents_Controllers {
         $this->form_validation->set_rules('no_segel3', 'No Segel 3', '');
         $this->form_validation->set_rules('partner_name', 'Partner Name', 'required');
         
-        
         $this->form_validation->set_rules('no_do', 'No Do', 'required');
         $this->form_validation->set_rules('origin', 'Origin', 'required');
         $this->form_validation->set_rules('qty_box', 'Qty Box', 'numeric|required');
@@ -156,19 +155,37 @@ class Contract extends Parents_Controllers {
 
         if ($this->form_validation->run($this) == TRUE)
         {
-//            $sales = array('cust_id' => $this->input->post('ccustomer'), 'contract_id' => setnol($this->input->post('ccontract')),
-//                           'dates' => date("Y-m-d H:i:s"), 
-//                           'branch_id' => $this->branch->get_branch_default(), 'cost' => $this->input->post('tcosts'),
-//                           'due_date' => $this->input->post('tduedates'), 'payment_id' => $this->input->post('cpayment'), 
-//                           'cash' => $this->input->post('ccash'), 
-//                           'created' => date('Y-m-d H:i:s'));
-//
-//            if ($this->Sales_model->add($sales) != true){ $this->reject();
-//            }else{ $this->Sales_model->log('create'); $this->output = $this->Sales_model->get_latest(); } 
+            $sales = array('picking_id' => $this->input->post('pickingid'), 
+                           'picking_name' => $this->stock_picking_lib->get_name($this->input->post('pickingid')),
+                           'sequence' => $this->input->post('sequence'), 'product_id' => $this->input->post('product_id'),
+                           'product_uom_id' => $this->input->post('product_uom_id'), 'location_id' => $this->input->post('location_id'),
+                           'location_dest_id' => $this->input->post('location_dest_id'), 'do' => $this->input->post('do'), 
+                           'nama_kendaraan' => $this->input->post('nama_kendaraan'), 'no_container' => $this->input->post('no_container'), 
+                           'no_polisi' => $this->input->post('no_polisi'), 'transporter' => $this->input->post('transporter'),
+                           'driver_name' => $this->input->post('driver_name'), 'destination' => $this->input->post('destination'),
+                           'no_karcis_timbangan' => $this->input->post('no_karcis_timbangan'), 'no_surat_jalan' => $this->input->post('no_surat_jalan'),
+                           'tgl_keluar_from' => $this->input->post('tgl_keluar_from'), 'tgl_masuk_truk' => $this->input->post('tgl_masuk_truk'),
+                           'tgl_keluar_truk' => $this->input->post('tgl_keluar_truk'), 'bruto_from' => $this->input->post('bruto_from'),
+                           'tarra_from' => $this->input->post('tarra_from'), 'netto_from' => $this->input->post('netto_from'),
+                           'bruto' => $this->input->post('bruto'), 'tarra' => $this->input->post('tarra'), 'qty_done' => $this->input->post('qty_done'),
+                           'netto_diff' => $this->input->post('netto_diff'), 'netto_diff_persen' => $this->input->post('netto_diff_persen'), 'ffa_from' => $this->input->post('ffa_from'),
+                           'mni_from' => $this->input->post('mni_from'), 'imp_from' => $this->input->post('imp_from'), 'iv_from' => $this->input->post('iv_from'), 'mpt_degrees_from' => $this->input->post('mpt_degrees_from'), 'color_from' => $this->input->post('color_from'),
+                           'ffa' => $this->input->post('ffa'), 'mni' => $this->input->post('mni'), 'imp' => $this->input->post('imp'), 'iv' => $this->input->post('iv'),
+                           'mpt_degrees' => $this->input->post('mpt_degrees'), 'color' => $this->input->post('color'),
+                           'no_segel1' => $this->input->post('no_segel1'), 'no_segel2' => $this->input->post('no_segel2'), 'no_segel3' => $this->input->post('no_segel3'),
+                           'partner_name' => $this->input->post('partner_name'), 
+                           'no_do' => $this->input->post('no_do'), 'origin' => $this->input->post('origin'), 'qty_box' => $this->input->post('qty_box'), 'asal_pks' => $this->input->post('asal_pks'),
+                           'state' => $this->input->post('state'), 'create_uid' => $this->input->post('create_uid'), 'create_date' => $this->input->post('create_date'),
+                           'write_uid' => $this->input->post('write_uid'),  'write_date' => $this->input->post('write_date'), 'date' => $this->input->post('date')
+                    );
+            
+            if ($this->stock_picking_truck_lib->add($sales) != true){ 
+                  $this->error = 'Failed to posted'; $this->status = 403;
+            }else{ $this->resx = $this->stock_picking_truck_lib->get_latest(); } 
         }
         else{ $this->error = validation_errors(); $this->status = 400;   }
         
-        $data['result'] = null; 
+        $data['result'] = $this->resx; 
         $data['error'] = $this->error;
         $this->output_response($data, $this->status);
         
