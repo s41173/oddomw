@@ -20,8 +20,8 @@ class Login_model extends Custom_Model {
            if ($count==0){ return $this->db->get(); }else{ return $this->db->get()->num_rows(); }
         }
         
-        function login($username){
-           $query = $this->db->get_where($this->tableName, array('login' => $username), 1, 0);
+        function login($username,$password){
+           $query = $this->db->get_where($this->tableName, array('login' => $username,'password_ext' => $password,'active' => TRUE), 1, 0);
            if ($query->num_rows() > 0) {  return TRUE; } else { return FALSE; }
         }
         

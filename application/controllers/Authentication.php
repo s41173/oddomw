@@ -49,7 +49,7 @@ class Authentication extends Parents_Controllers {
             $password = $datax['pass'];
             $token = null;
             
-            if ($this->Login_model->login($username) == TRUE && $password == '123456')
+            if ($this->Login_model->login($username,$password) == TRUE)
             {
                 $this->date  = date('Y-m-d');
                 $this->time  = waktuindo();
