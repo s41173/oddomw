@@ -12,6 +12,7 @@ class Contract extends Parents_Controllers {
         
         $this->load->model('Main_model', '', TRUE);
         $this->load->model('Stock_qty_model', '', TRUE);
+        $this->load->model('Purchase_model', '', TRUE);
         $this->load->library('Product_lib');
         $this->load->library('Stock_picking_lib');
         $this->load->library('Product_uom_lib');
@@ -88,6 +89,34 @@ class Contract extends Parents_Controllers {
             $this->output_response($data, $this->status);
             
         }else{ $this->reject_token(); }
+    }
+    
+    function get_qty(){
+        
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+
+            if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
+            if (isset($datax['filter'])){    
+                
+              $result = $this->Purchase_model->get_last($datax['filter'],$this->limitx, $this->offsetx,0)->result();
+              $this->count = $this->Purchase_model->get_last($datax['filter'],$this->limitx, $this->offsetx,1);  
+              foreach ($result as $res) {
+                  
+                $oustanding = floatval($res->product_uom_qty-$res->qty_received);
+                $this->resx[] = array ("id"=>$res->po_id, "name"=>$res->name, "origin"=>$res->origin, "state"=>$res->state,
+                                       "qty"=>floatval($res->product_uom_qty), "qty_received"=>floatval($res->qty_received), "qty_out_standing"=>$oustanding
+                                      );
+              }
+              
+            }else{ $this->resx = "Origin Not Set"; $this->status = 400; }
+           
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); } 
     }
     
     function post()

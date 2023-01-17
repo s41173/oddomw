@@ -28,6 +28,7 @@ class Main_model extends Custom_Model {
         // 2 = Picking Name
         // 3 = No dokumen do
         // 4 = No Contract
+        
         function get_detail_list($type=0,$contractno=null,$limit=10,$offset=0,$count=0)
         {
             $this->db->select('stock_picking.id as picking_id, stock_picking.origin, stock_picking.no_po, stock_picking.no_contract,'
