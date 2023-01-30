@@ -181,6 +181,13 @@ class Contract extends Parents_Controllers {
         $this->form_validation->set_rules('write_uid', 'Write UID', 'numeric|required|callback_valid_uid_write');
         $this->form_validation->set_rules('write_date', 'Write Date', 'required');
         $this->form_validation->set_rules('date', 'Date', 'required');
+        
+        $this->form_validation->set_rules('cloud_point', 'Cloud Point', '');
+        $this->form_validation->set_rules('saponifiable_matter', 'Saponifiable Matter', '');
+        $this->form_validation->set_rules('peroxide_value', 'Peroxide Value', '');
+        $this->form_validation->set_rules('no_segel4', 'No Segel 4', '');
+        $this->form_validation->set_rules('moist_from', 'Moist From', '');
+        $this->form_validation->set_rules('moist', 'Moist', '');
 
         if ($this->form_validation->run($this) == TRUE)
         {
@@ -205,7 +212,9 @@ class Contract extends Parents_Controllers {
                            'partner_name' => $this->input->post('partner_name'), 
                            'no_do' => $this->input->post('no_do'), 'origin' => $this->input->post('origin'), 'qty_box' => $this->input->post('qty_box'), 'asal_pks' => $this->input->post('asal_pks'),
                            'state' => $this->input->post('state'), 'create_uid' => $this->input->post('create_uid'), 'create_date' => $this->input->post('create_date'),
-                           'write_uid' => $this->input->post('write_uid'),  'write_date' => $this->input->post('write_date'), 'date' => $this->input->post('date')
+                           'write_uid' => $this->input->post('write_uid'),  'write_date' => $this->input->post('write_date'), 'date' => $this->input->post('date'),
+                           'cloud_point' => $this->input->post('cloud_point'), 'saponifiable_matter' => $this->input->post('saponifiable_matter'), 'peroxide_value' => $this->input->post('peroxide_value'),
+                           'no_segel4' => $this->input->post('no_segel4'), 'moist_from' => $this->input->post('moist_from'), 'moist' => $this->input->post('moist')
                     );
             
             if ($this->stock_picking_truck_lib->add($sales) != true){ 
