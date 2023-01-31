@@ -12,7 +12,7 @@ class Purchase_model extends Custom_Model {
 
         protected $field;
         
-        public function get_last($contractno,$limit=50, $offset=0, $count=0)
+        public function get_last($contractno=null,$limit=50, $offset=0, $count=0)
         { 
            $this->db->select('po.id as po_id, po.name, po.origin, po.state,'
                            . 'pl.product_uom_qty, pl.qty_received'

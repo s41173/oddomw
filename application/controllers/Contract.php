@@ -51,9 +51,9 @@ class Contract extends Parents_Controllers {
             $this->limitx=10; $this->offsetx=0;
 
             if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
-//            if (isset($datax['filter'])){                 
-              $result = $this->Stock_qty_model->get_last($this->limitx, $this->offsetx,0)->result();
-              $this->count = $this->Stock_qty_model->get_last($this->limitx, $this->offsetx,1);  
+            if (isset($datax['filter'])){                 
+              $result = $this->Stock_qty_model->get_last($datax['filter'],$this->limitx, $this->offsetx,0)->result();
+              $this->count = $this->Stock_qty_model->get_last($datax['filter'],$this->limitx, $this->offsetx,1);  
 //              $this->resx = $this->Stock_qty_model->get_last($datax['search_type'],$this->limitx, $this->offsetx,0)->result();
                 foreach ($result as $res) {
                     $product = $this->product_lib->get_detail($res->product_id);
@@ -63,7 +63,7 @@ class Contract extends Parents_Controllers {
                                           );
                 }
               
-//            }else{ $this->resx = "Search Type Not Set"; $this->status = 400; }
+            }else{ $this->resx = "Search Type Not Set"; $this->status = 400; }
            
             $data['record'] = $this->count; 
             $data['result'] = $this->resx; 
