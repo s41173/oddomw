@@ -268,8 +268,8 @@ class Custom_Model extends CI_Model {
     function force_delete($uid,$field=null)
     {
         if (!$field){ $field = $uid; }
-        $prev = json_encode($this->get_by_id($uid)->row());
-        $this->logs->insert($this->session->userdata('userid'), date('Y-m-d'), waktuindo(), 'forced_delete', $this->com, $field, $prev);
+//        $prev = json_encode($this->get_by_id($uid)->row());
+//        $this->logs->insert($this->session->userdata('userid'), date('Y-m-d'), waktuindo(), 'forced_delete', $this->com, $field, $prev);
         
         $this->db->where('id', $uid);
         return $this->db->delete($this->tableName);
