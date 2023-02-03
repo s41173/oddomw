@@ -19,6 +19,7 @@ class Contract extends Parents_Controllers {
         $this->load->library('Stock_location_lib');
         $this->load->library('Res_user_lib');
         $this->load->library('Stock_picking_truck_lib');
+        $this->load->library('Stock_quant_lib');
         
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -56,9 +57,14 @@ class Contract extends Parents_Controllers {
               $this->count = $this->Stock_qty_model->get_last($datax['filter'],$this->limitx, $this->offsetx,1);  
 //              $this->resx = $this->Stock_qty_model->get_last($datax['search_type'],$this->limitx, $this->offsetx,0)->result();
                 foreach ($result as $res) {
-                    $product = $this->product_lib->get_detail($res->product_id);
-                    $this->resx[] = array ("id"=>$res->stock_quant_id, "product_id"=>$res->product_id, "company_id"=>$res->company_id, "location_id"=>$res->location_id,
-                                           "quantity"=>floatval($res->quantity), "reserved_quantity"=>floatval($res->reserved_quantity),"product_detail"=>$product,
+                    
+//                    print_r($res).'<br/>';
+                    
+//                    $product = $this->product_lib->get_detail($res->product_id);
+                    $quant = $this->stock_quant_lib->quant_amount($res->id);
+                    $product = null;
+                    $this->resx[] = array ("id"=>$res->id, "product_id"=>null, "company_id"=>1, "location_id"=>$res->id,
+                                           "quantity"=>intval($quant[0]), "reserved_quantity"=>intval($quant[1]),"product_detail"=>$product,
                                            "stock_location_name"=>$res->stock_location_name, "stock_location_complete_name"=>$res->complete_name
                                           );
                 }
