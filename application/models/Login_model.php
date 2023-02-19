@@ -46,6 +46,9 @@ class Login_model extends Custom_Model {
             if ($query > 0) {  return TRUE; } else { return FALSE; }
         }
         
+        function get_user_by_token($token){
+            $query = $this->db->get_where($this->tableName, array('password' => $token), 1, 0)->row();
+            return $query;
+        }
         
-
 }

@@ -36,6 +36,18 @@ class Authentication extends Parents_Controllers {
         }else{ $this->reject_token(); }
     }
     
+    function set_token(){
+      $datax = (array)json_decode(file_get_contents('php://input'));
+      if (isset($datax['userid']) && isset($datax['token'])){
+          
+          $stts = $this->Login_model->set_token($datax['userid'],$datax['token']);
+          if ($stts == true){ $this->error = 'Token set'; }else{ $this->status = 403; $this->error = "Failed to set token"; }
+      }
+      else{ $this->status = 400; $this->error = 'User / Token Not Set'; }
+      $output = array('error' => $this->error); 
+      $this->output_response($output, $this->status);
+    }
+    
     function login()
     {
         $datax = (array)json_decode(file_get_contents('php://input')); 
@@ -99,6 +111,21 @@ class Authentication extends Parents_Controllers {
                 }else{ $this->error = 'Authentication Failed'; $this->status = 401; }
             }else{ $this->status = 401; $this->error = 'Token Not Found'; }
 
+        }
+        $this->output_response($this->error, $this->status);
+    }
+    
+    function decode_token(){
+        if ($this->input->server('REQUEST_METHOD') != 'OPTIONS'){
+            $jwt = $this->input->get_request_header('X-auth-token');
+            if ($this->Login_model->cek_token($jwt) == TRUE)
+            {
+                $result = $this->Login_model->get_user_by_token($jwt);
+                $data['userid'] = $result->id;
+                $data['username'] = $result->login;
+                $data['role'] = $result->level_ext;
+                $this->error = $data;
+            }else{ $this->status = 401; $this->error = 'Token Not Found'; }
         }
         $this->output_response($this->error, $this->status);
     }
