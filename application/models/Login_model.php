@@ -51,4 +51,9 @@ class Login_model extends Custom_Model {
             return $query;
         }
         
+         function get_active_user($username){
+           $query = $this->db->get_where($this->tableName, array('login' => $username, 'active' => true), 1, 0)->num_rows();
+           if ($query > 0){ return TRUE; }else{ return FALSE; }
+        }
+        
 }

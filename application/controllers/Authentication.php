@@ -95,6 +95,24 @@ class Authentication extends Parents_Controllers {
        $this->output_response($output, $this->status);
     }
     
+    // cek user from oddo active
+    function cek_user()
+    {
+        $datax = (array)json_decode(file_get_contents('php://input')); 
+        if (isset($datax['user'])){
+
+            $username = $datax['user'];
+            if ($this->Login_model->get_active_user($username) != TRUE)
+            {
+              $this->status = 404; $this->error = 'User Not Found';
+            }
+       }else{ $this->status = 401; $this->error = 'Invalid Format'; }   
+       
+       $output = array('error' => $this->error); 
+//       print_r($output);
+       $this->output_response($output, $this->status);
+    }
+    
     function decode(){
         if ($this->input->server('REQUEST_METHOD') != 'OPTIONS'){
             $jwt = $this->input->get_request_header('X-auth-token');
