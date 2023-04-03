@@ -20,6 +20,7 @@ class Contract extends Parents_Controllers {
         $this->load->library('Res_user_lib');
         $this->load->library('Stock_picking_truck_lib');
         $this->load->library('Stock_quant_lib');
+        $this->load->library('Res_partner_lib');
         
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -38,6 +39,25 @@ class Contract extends Parents_Controllers {
               $this->resx = $this->Main_model->get_detail_list($datax['search_type'],$datax['filter'],$this->limitx, $this->offsetx,0)->result();
               $this->count = $this->Main_model->get_detail_list($datax['search_type'],$datax['filter'],$this->limitx, $this->offsetx,1);  
             }else{ $this->resx = "Search Type Not Set"; $this->status = 400; }
+           
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); }
+    }
+    
+    function vendor()
+    {
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+
+            if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
+            if (isset($datax['type'])){                 
+              $this->resx = $this->res_partner_lib->get_last($datax['type'],$this->limitx, $this->offsetx,0)->result();
+              $this->count = $this->res_partner_lib->get_last($datax['type'],$this->limitx, $this->offsetx,1);  
+            }else{ $this->resx = "Type Not Set"; $this->status = 400; }
            
             $data['record'] = $this->count; 
             $data['result'] = $this->resx; 
