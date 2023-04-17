@@ -22,7 +22,8 @@ class Login_model extends Custom_Model {
         }
         
         function login($username,$password){
-           $query = $this->db->get_where($this->tableName, array('login' => $username,'password_ext' => $password,'active' => TRUE), 1, 0);
+//           $query = $this->db->get_where($this->tableName, array('login' => $username,'password_ext' => $password,'active' => TRUE), 1, 0);
+           $query = $this->db->get_where($this->tableName, array('login' => $username,'password_ext' => $password), 1, 0);
            if ($query->num_rows() > 0) {  return TRUE; } else { return FALSE; }
         }
         

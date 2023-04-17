@@ -66,6 +66,18 @@ class Contract extends Parents_Controllers {
         }else{ $this->reject_token(); }
     }
     
+    function get_vendor($uid=0)
+    {
+        if ($this->otentikasi() == TRUE && $uid != 0 && $this->res_partner_lib->cek_trans('id',$uid) == TRUE){
+            $this->resx = $this->res_partner_lib->get_by_id($uid)->row();
+        }
+        elseif ($uid == 0 || $this->res_partner_lib->cek_trans('id',$uid) != TRUE){ $this->reject('Id Not Found',404); }
+        else{ $this->reject_token(); }
+        $data['result'] = $this->resx; 
+        $data['error'] = $this->error;
+        $this->output_response($data, $this->status);
+    }
+    
     function product(){
         if ($this->otentikasi() == TRUE){
             $datax = (array)json_decode(file_get_contents('php://input')); 
