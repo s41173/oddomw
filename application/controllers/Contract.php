@@ -110,6 +110,36 @@ class Contract extends Parents_Controllers {
         }else{ $this->reject_token(); }
     }
     
+    function retail_product(){
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+
+            if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
+            if (isset($datax['filter'])){   
+                
+              $result = $this->product_lib->get_retail(0)->result();
+              $this->count = $this->product_lib->get_retail(1);  
+
+                foreach ($result as $res) {
+                    $quant = $this->stock_quant_lib->quant_amount($res->product_id);
+                    $this->resx[] = array ("code"=>$res->code, "product_tmpl_id"=>$res->product_tmpl_id, "name"=>$res->name,
+                                           "description"=>$res->description,
+                                           "type"=> $res->type,
+                                           "location_type"=>$res->location_type, "uom_name"=>$res->uom_name,
+                                           "list_price" => $res->list_price, "quantity"=>intval($quant[0]), "reserved_quantity"=>intval($quant[1])
+                                          );
+                }
+              
+            }else{ $this->resx = "Search Type Not Set"; $this->status = 400; }
+           
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); }
+    }
+    
      function xproduct(){
         if ($this->otentikasi() == TRUE){
             $datax = (array)json_decode(file_get_contents('php://input')); 
