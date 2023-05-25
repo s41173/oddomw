@@ -34,7 +34,7 @@ class Product_lib extends Custom_Model {
         if ($count==0){ return $this->db->get()->row(); }else{ return $this->db->get()->num_rows(); }
     }
     
-    function get_retail($count=0)
+    function get_retail($filter=null,$count=0)
     {
 //        SELECT DISTINCT pp.default_code, pt.name
 //        FROM product_product pp
@@ -57,6 +57,7 @@ class Product_lib extends Custom_Model {
         $this->db->where('product_template.uom_id = uom_uom.id');
         $this->db->where('product_template.type', 'product');
         $this->db->where('sale_order.type_id', '2');
+        $this->cek_null($filter, 'product_product.id');
         $this->db->distinct();
         
 //        $this->db->limit(10);

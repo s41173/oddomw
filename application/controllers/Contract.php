@@ -14,6 +14,7 @@ class Contract extends Parents_Controllers {
         $this->load->model('Stock_qty_model', '', TRUE);
         $this->load->model('Purchase_model', '', TRUE);
         $this->load->library('Product_lib');
+        $this->load->library('Tax_lib');
         $this->load->library('Stock_picking_lib');
         $this->load->library('Product_uom_lib');
         $this->load->library('Stock_location_lib');
@@ -21,6 +22,8 @@ class Contract extends Parents_Controllers {
         $this->load->library('Stock_picking_truck_lib');
         $this->load->library('Stock_quant_lib');
         $this->load->library('Res_partner_lib');
+        $this->load->library('Payment_term_lib');
+        $this->load->library('Sale_coupon_lib');
         
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -110,6 +113,65 @@ class Contract extends Parents_Controllers {
         }else{ $this->reject_token(); }
     }
     
+     function sale_coupon(){
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+
+            if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
+                           
+              $result = $this->sale_coupon_lib->get_last($this->limitx, $this->offsetx,0)->result();
+              $this->count = $this->sale_coupon_lib->get_last($this->limitx, $this->offsetx,1);  
+
+              foreach ($result as $res) {
+              
+//                  print_r($res);
+
+                $this->resx[] = array ("id"=>$res->id, "name"=>$res->name, "active"=>$res->active, "rule_id"=>$res->rule_id,
+                                       "reward_id"=>$res->reward_id, "sequence"=>$res->sequence,
+                                       "maximum_use_number"=>$res->maximum_use_number, "program_type"=>$res->program_type,
+                                       "promo_code_usage"=>$res->promo_code_usage, "promo_code"=>$res->promo_code,
+                                       "promo_applicability"=>$res->promo_applicability, "company_id"=>$res->company_id,
+                                       "validity_duration"=>$res->validity_duration,
+                                       "create_uid"=>$res->create_uid,
+                                       "create_date"=>$res->create_date, "write_uid"=>$res->write_uid, "write_date"=>$res->write_date
+                                      );
+              }
+              
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); }
+    }
+    
+    function payment_term(){
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            $this->limitx=10; $this->offsetx=0;
+
+            if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
+                           
+              $result = $this->payment_term_lib->get_last($this->limitx, $this->offsetx,0)->result();
+              $this->count = $this->payment_term_lib->get_last($this->limitx, $this->offsetx,1);  
+
+              foreach ($result as $res) {
+              
+//                  print_r($res);
+
+                $this->resx[] = array ("id"=>$res->id, "name"=>$res->name, "active"=>$res->active, "note"=>$res->note,
+                                       "company_id"=>$res->company_id, "sequence"=>$res->sequence, "create_uid"=>$res->create_uid,
+                                       "create_date"=>$res->create_date, "write_uid"=>$res->write_uid, "write_date"=>$res->write_date
+                                      );
+              }
+              
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); }
+    }
+    
     function retail_product(){
         if ($this->otentikasi() == TRUE){
             $datax = (array)json_decode(file_get_contents('php://input')); 
@@ -117,17 +179,71 @@ class Contract extends Parents_Controllers {
 
             if (isset($datax['limit']) && isset($datax['offset'])){ $this->limitx = $datax['limit']; $this->offsetx = $datax['offset'];}            
             if (isset($datax['filter'])){   
-                
-              $result = $this->product_lib->get_retail(0)->result();
-              $this->count = $this->product_lib->get_retail(1);  
+                  
+              $result = $this->product_lib->get_retail($datax['filter'],0)->result();
+              $this->count = $this->product_lib->get_retail($datax['filter'],1);  
 
                 foreach ($result as $res) {
                     $quant = $this->stock_quant_lib->quant_amount($res->product_id);
-                    $this->resx[] = array ("code"=>$res->code, "product_tmpl_id"=>$res->product_tmpl_id, "name"=>$res->name,
+                    $this->resx[] = array ("code"=>$res->code, "product_id"=>$res->product_id, "product_tmpl_id"=>$res->product_tmpl_id, "name"=>$res->name,
                                            "description"=>$res->description,
                                            "type"=> $res->type,
                                            "location_type"=>$res->location_type, "uom_name"=>$res->uom_name,
                                            "list_price" => $res->list_price, "quantity"=>intval($quant[0]), "reserved_quantity"=>intval($quant[1])
+                                          );
+                }
+              
+            }else{ $this->resx = "Search Type Not Set"; $this->status = 400; }
+           
+            $data['record'] = $this->count; 
+            $data['result'] = $this->resx; 
+            $this->output_response($data, $this->status);
+            
+        }else{ $this->reject_token(); }
+    }
+    
+    function get_product_by_id($pid=0){
+        if ($this->otentikasi() == TRUE && $this->product_lib->get_retail($pid,1) > 0){
+               
+//            print_r($this->product_lib->get_retail($pid,1));
+              $result = $this->product_lib->get_retail($pid,0)->result();
+              $this->count = $this->product_lib->get_retail($pid,1);  
+
+              foreach ($result as $res) {
+                    $quant = $this->stock_quant_lib->quant_amount($res->product_id);
+                    $this->resx[] = array ("code"=>$res->code, "product_id"=>$res->product_id, "product_tmpl_id"=>$res->product_tmpl_id, "name"=>$res->name,
+                                           "description"=>$res->description,
+                                           "type"=> $res->type,
+                                           "location_type"=>$res->location_type, "uom_name"=>$res->uom_name,
+                                           "list_price" => $res->list_price, "quantity"=>intval($quant[0]), "reserved_quantity"=>intval($quant[1])
+                                          );
+              }            
+        }
+        elseif ($this->product_lib->get_retail($pid,1) == 0){ $this->reject('Not Found',404); }
+        else{ $this->reject_token(); }
+        
+        $data['result'] = $this->resx; 
+        $data['error'] = $this->error;
+        $this->output_response($data, $this->status);
+    }
+    
+     function tax(){
+        if ($this->otentikasi() == TRUE){
+            $datax = (array)json_decode(file_get_contents('php://input')); 
+            if (isset($datax['filter'])){   
+                  
+              $result = $this->tax_lib->get_last($datax['filter'],0)->result();
+              $this->count = $this->tax_lib->get_last($datax['filter'],1);  
+
+                foreach ($result as $res) {
+                    
+                    $this->resx[] = array ("id"=>$res->id, "name"=>$res->name, "type_tax_use"=>$res->type_tax_use, "amount_type"=>$res->amount_type,
+                                           "company_id"=>$res->company_id, "sequence"=> $res->sequence,
+                                           "amount"=>floatval($res->amount), "description"=>$res->description,
+                                           "price_include" => $res->price_include, "include_base_amount"=>$res->include_base_amount,
+                                           "analytic"=>$res->analytic,"tax_group_id"=>$res->tax_group_id,"tax_exigibility"=>$res->tax_exigibility,
+                                           "cash_basis_transition_account_id"=>$res->cash_basis_transition_account_id,"cash_basis_base_account_id"=>$res->cash_basis_base_account_id,
+                                           "create_uid"=>$res->create_uid,"create_date"=>$res->create_date,"write_uid"=>$res->write_uid,"write_date"=>$res->write_date
                                           );
                 }
               
